@@ -1,29 +1,18 @@
-/** @type {import('vite').Plugin} */
-function TauriPlugin() {
-    return {
-        name: 'vite-plugin-tauri',
-        configureServer(server) {
-            server.middlewares.use((req, res, next) => {
-                if (req.url === '/tauri') {
-                    res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify({ tauri: { event: 'test' } }));
-                    return;
-                }
-                next();
-            });
-        },
-    };
-}
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': '/src',
+      '@': path.resolve(__dirname, './src'),
     },
+  },
+  server: {
+    host: '0.0.0.0',     // 启用远程访问
+    port: 5173,
+    strictPort: false,  // 允许端口自动切换
   },
 })

@@ -11,11 +11,9 @@ export default {
           DEFAULT: '#6366f1',
           hover: '#4f46e5',
         },
-        background: {
-          DEFAULT: '#0f172a',
-          surface: '#1e293b',
-          'surface-hover': '#334155',
-        },
+        background: '#0f172a',
+        surface: '#1e293b',
+        'surface-hover': '#334155',
         text: {
           primary: '#f8fafc',
           secondary: '#94a3b8',
