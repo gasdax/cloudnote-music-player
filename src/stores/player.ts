@@ -10,6 +10,10 @@ export interface Song {
   duration: number
   filePath?: string
   coverArt?: string
+  source?: 'local' | 'jamendo'
+  permalink?: string
+  license?: string
+  fileData?: string | null
 }
 
 export const usePlayerStore = defineStore('player', () => {

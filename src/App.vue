@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div
     class="app-shell min-h-screen text-text-primary"
     @dragenter.prevent="onDragEnter"
@@ -51,8 +51,8 @@
             </div>
             <div>
               <div class="text-[11px] uppercase tracking-[0.4em] text-cyan-200/75">Cloudnote Player</div>
-              <h1 class="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[2rem]">更像播放器，不像后台面板</h1>
-              <p class="mt-1 text-sm text-text-secondary">导入、筛选、收藏和播放都集中在一个更清爽的工作台里。</p>
+              <h1 class="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[2rem]">本地播放器升级成在线探索版</h1>
+              <p class="mt-1 text-sm text-text-secondary">保留本地播放体验，同时增加合法在线音乐发现能力，方便把喜欢的内容拉进队列。</p>
             </div>
           </div>
 
@@ -62,7 +62,7 @@
               <input
                 v-model="searchQuery"
                 class="input-shell h-12 w-full rounded-2xl pl-11 pr-12 text-sm text-white outline-none transition"
-                placeholder="搜索歌曲、歌手、专辑"
+                placeholder="搜索本地队列里的歌曲、歌手、专辑"
               />
               <button
                 v-if="searchQuery"
@@ -131,7 +131,7 @@
               当前氛围
             </div>
             <p class="mt-2 text-sm text-text-secondary">
-              {{ player.currentSong ? `正在播放 ${player.currentSong.title}` : '还没有选中歌曲，先导入一批音乐吧。' }}
+              {{ player.currentSong ? `正在播放 ${player.currentSong.title}` : '还没有选中歌曲，先导入一批本地音乐或切到在线发现。' }}
             </p>
             <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-text-secondary">
               <div class="rounded-2xl border border-white/10 bg-black/15 px-3 py-3">
@@ -139,8 +139,8 @@
                 <div class="mt-1 text-sm text-white">{{ repeatModeLabel }}</div>
               </div>
               <div class="rounded-2xl border border-white/10 bg-black/15 px-3 py-3">
-                <div class="text-[11px] uppercase tracking-[0.24em]">随机</div>
-                <div class="mt-1 text-sm text-white">{{ player.shuffleMode ? '已开启' : '关闭' }}</div>
+                <div class="text-[11px] uppercase tracking-[0.24em]">在线源</div>
+                <div class="mt-1 text-sm text-white">{{ jamendoClientId ? '已配置' : '未配置' }}</div>
               </div>
             </div>
           </div>
@@ -166,7 +166,6 @@
             </div>
           </div>
         </aside>
-
         <section class="panel-card flex min-h-[480px] flex-col overflow-hidden rounded-[2rem]">
           <div class="border-b border-white/10 px-4 py-4 sm:px-5">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -177,51 +176,211 @@
               </div>
 
               <div class="flex flex-wrap gap-2">
-                <button
-                  class="secondary-button h-11 rounded-2xl px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="!player.currentSong || player.playlist.length === 0"
-                  @click="locateCurrent"
-                >
-                  <MapPinned class="mr-2 inline h-4 w-4" />
-                  定位当前
-                </button>
-                <button
-                  class="secondary-button h-11 rounded-2xl px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="player.playlist.length === 0"
-                  @click="showPlaylist = true"
-                >
-                  <Rows3 class="mr-2 inline h-4 w-4" />
-                  队列弹窗
-                </button>
-                <button
-                  class="danger-button h-11 rounded-2xl px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="player.playlist.length === 0"
-                  @click="clearAllPlaylist"
-                >
-                  <Trash2 class="mr-2 inline h-4 w-4" />
-                  清空列表
-                </button>
+                <template v-if="activeTab === 'discover'">
+                  <button class="secondary-button h-11 rounded-2xl px-4 text-sm font-medium text-white" @click="loadFeaturedTracks">
+                    <Globe2 class="mr-2 inline h-4 w-4" />
+                    刷新推荐
+                  </button>
+                  <button class="secondary-button h-11 rounded-2xl px-4 text-sm font-medium text-white" @click="showSettings = true">
+                    <Settings2 class="mr-2 inline h-4 w-4" />
+                    配置 API
+                  </button>
+                </template>
+                <template v-else>
+                  <button
+                    class="secondary-button h-11 rounded-2xl px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="!player.currentSong || player.playlist.length === 0"
+                    @click="locateCurrent"
+                  >
+                    <MapPinned class="mr-2 inline h-4 w-4" />
+                    定位当前
+                  </button>
+                  <button
+                    class="secondary-button h-11 rounded-2xl px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="player.playlist.length === 0"
+                    @click="showPlaylist = true"
+                  >
+                    <Rows3 class="mr-2 inline h-4 w-4" />
+                    队列弹窗
+                  </button>
+                  <button
+                    class="danger-button h-11 rounded-2xl px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="player.playlist.length === 0"
+                    @click="clearAllPlaylist"
+                  >
+                    <Trash2 class="mr-2 inline h-4 w-4" />
+                    清空列表
+                  </button>
+                </template>
               </div>
             </div>
           </div>
 
           <div ref="listViewportRef" class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4">
-            <div v-if="player.playlist.length === 0" class="flex h-full min-h-[360px] items-center justify-center px-4 py-10">
+            <div v-if="activeTab === 'discover'" class="space-y-4">
+              <div class="discover-hero rounded-[1.8rem] border border-white/10 px-5 py-5">
+                <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div class="max-w-2xl">
+                    <div class="flex items-center gap-2 text-sm font-medium text-white">
+                      <BadgeCheck class="h-4 w-4 text-cyan-200" />
+                      合法音乐接入
+                    </div>
+                    <h3 class="mt-3 text-2xl font-semibold tracking-tight text-white">Jamendo 在线发现</h3>
+                    <p class="mt-2 text-sm leading-6 text-text-secondary">
+                      这里接的是可合法使用的 Creative Commons 音乐源，适合做公开项目、个人播放器和在线试听功能。
+                    </p>
+                  </div>
+
+                  <div class="rounded-[1.4rem] border border-white/10 bg-black/20 px-4 py-4 text-sm text-text-secondary lg:w-[280px]">
+                    <div class="text-[11px] uppercase tracking-[0.28em]">Status</div>
+                    <div class="mt-2 text-white">{{ clientIdStatus }}</div>
+                    <div class="mt-2 text-xs leading-5">需要在设置里填入 Jamendo Client ID，之后就能搜索和播放合法 CC 音乐。</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-4">
+                <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                  <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                    <label class="relative block">
+                      <Search class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+                      <input
+                        v-model="onlineQuery"
+                        class="input-shell h-12 w-full rounded-2xl pl-11 pr-4 text-sm text-white outline-none transition"
+                        placeholder="搜索在线歌曲，例如 ambient、piano、lofi"
+                        @keyup.enter="searchOnlineTracks"
+                      />
+                    </label>
+                    <button class="primary-button h-12 rounded-2xl px-5 text-sm font-medium text-white" @click="searchOnlineTracks">
+                      <CloudDownload class="mr-2 inline h-4 w-4" />
+                      搜索在线音乐
+                    </button>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      v-for="tag in featuredTags"
+                      :key="tag"
+                      class="tag-pill"
+                      :class="onlineFeaturedTag === tag ? 'tag-pill-active' : 'tag-pill-idle'"
+                      @click="selectFeaturedTag(tag)"
+                    >
+                      {{ tag }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="!jamendoClientId" class="empty-panel rounded-[1.8rem] border border-dashed border-white/10 px-5 py-10 text-center">
+                <h3 class="text-xl font-semibold text-white">先配置 Jamendo Client ID</h3>
+                <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-text-secondary">
+                  我已经把在线发现功能接好了，但为了合规调用官方接口，需要你在设置里填入自己的 Jamendo 应用 Client ID。
+                </p>
+                <button class="secondary-button mt-5 h-11 rounded-2xl px-5 text-sm font-medium text-white" @click="showSettings = true">
+                  打开设置
+                </button>
+              </div>
+
+              <div v-else-if="onlineLoading" class="empty-panel rounded-[1.8rem] border border-white/10 px-5 py-12 text-center">
+                <LoaderCircle class="mx-auto h-8 w-8 animate-spin text-cyan-200" />
+                <div class="mt-3 text-white">正在加载在线音乐</div>
+                <p class="mt-2 text-sm text-text-secondary">稍等一下，我在从 Jamendo 拉取结果。</p>
+              </div>
+
+              <div v-else-if="onlineError" class="empty-panel rounded-[1.8rem] border border-rose-400/20 bg-rose-500/10 px-5 py-8 text-center">
+                <h3 class="text-lg font-semibold text-white">在线搜索失败</h3>
+                <p class="mt-2 text-sm leading-6 text-text-secondary">{{ onlineError }}</p>
+              </div>
+
+              <div v-else-if="!onlineResults.length" class="empty-panel rounded-[1.8rem] border border-white/10 px-5 py-10 text-center">
+                <h3 class="text-xl font-semibold text-white">{{ onlineHasLoaded ? '没有找到结果' : '先试试推荐歌单' }}</h3>
+                <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-text-secondary">
+                  {{ onlineHasLoaded ? '换个关键词或切换推荐标签看看。' : '点击上方“刷新推荐”，或者输入关键词开始在线探索。' }}
+                </p>
+              </div>
+
+              <div v-else class="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+                <article
+                  v-for="track in onlineResults"
+                  :key="track.id"
+                  class="online-card rounded-[1.7rem] border border-white/10 p-4"
+                >
+                  <div class="flex gap-4">
+                    <div class="cover-frame flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] border border-white/10 bg-white/5">
+                      <img v-if="track.coverArt" :src="track.coverArt" :alt="track.title" class="h-full w-full object-cover" />
+                      <Disc3 v-else class="h-7 w-7 text-cyan-100" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate text-lg font-semibold text-white">{{ track.title }}</div>
+                      <div class="mt-1 truncate text-sm text-text-secondary">{{ track.artist }}</div>
+                      <div class="mt-1 truncate text-xs text-text-secondary">{{ track.album || 'Jamendo Release' }}</div>
+                      <div class="mt-3 flex flex-wrap items-center gap-2">
+                        <span class="badge-soft">CC Music</span>
+                        <span class="badge-soft">{{ formatTime(track.duration) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-3">
+                    <div class="flex flex-wrap gap-2">
+                      <button class="primary-button h-10 rounded-2xl px-4 text-sm font-medium text-white" @click="playOnlineTrack(track)">
+                        <Play class="mr-2 inline h-4 w-4" />
+                        立即播放
+                      </button>
+                      <button class="secondary-button h-10 rounded-2xl px-4 text-sm font-medium text-white" @click="addOnlineTrack(track)">
+                        <CloudDownload class="mr-2 inline h-4 w-4" />
+                        加入队列
+                      </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 text-xs text-text-secondary">
+                      <a
+                        v-if="track.permalink"
+                        :href="track.permalink"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/15 px-3 py-1.5 transition hover:bg-white/10 hover:text-white"
+                      >
+                        官方页面
+                        <ArrowUpRight class="h-3.5 w-3.5" />
+                      </a>
+                      <a
+                        v-if="track.license"
+                        :href="track.license"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/15 px-3 py-1.5 transition hover:bg-white/10 hover:text-white"
+                      >
+                        授权说明
+                        <ArrowUpRight class="h-3.5 w-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div v-else-if="player.playlist.length === 0" class="flex h-full min-h-[360px] items-center justify-center px-4 py-10">
               <div class="max-w-md text-center">
                 <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.8rem] border border-white/10 bg-white/5">
                   <Disc3 class="h-9 w-9 text-cyan-100" />
                 </div>
                 <h3 class="mt-6 text-2xl font-semibold tracking-tight text-white">先把音乐拖进来</h3>
                 <p class="mt-3 text-sm leading-6 text-text-secondary">
-                  这个版本更强调沉浸感，所以我把空状态也做成了入口。点击导入，或者直接把音频文件拖进窗口即可。
+                  你可以导入本地音频，也可以切到左侧的“在线发现”视图，先试听一些合法在线内容。
                 </p>
-                <button class="primary-button mt-6 h-12 rounded-2xl px-5 text-sm font-medium text-white" @click="triggerFileInput">
-                  <Upload class="mr-2 inline h-4 w-4" />
-                  导入音乐
-                </button>
+                <div class="mt-6 flex flex-wrap justify-center gap-3">
+                  <button class="primary-button h-12 rounded-2xl px-5 text-sm font-medium text-white" @click="triggerFileInput">
+                    <Upload class="mr-2 inline h-4 w-4" />
+                    导入音乐
+                  </button>
+                  <button class="secondary-button h-12 rounded-2xl px-5 text-sm font-medium text-white" @click="activeTab = 'discover'">
+                    <Globe2 class="mr-2 inline h-4 w-4" />
+                    在线发现
+                  </button>
+                </div>
               </div>
             </div>
-
             <div v-else-if="activeTab === 'library'" class="space-y-4">
               <div class="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
                 <button
@@ -277,6 +436,7 @@
                     >
                       Now
                     </span>
+                    <span v-if="song.source === 'jamendo'" class="badge-soft">Online</span>
                   </div>
                   <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
                     <span>{{ song.artist || '未知艺术家' }}</span>
@@ -336,8 +496,14 @@
                   class="record-disc flex h-[78%] w-[78%] items-center justify-center rounded-full border border-white/10 bg-[radial-gradient(circle,_rgba(255,255,255,0.13)_0%,_rgba(255,255,255,0.05)_28%,_rgba(8,14,27,0.9)_29%,_rgba(4,10,20,1)_100%)]"
                   :class="player.isPlaying ? 'animate-[spin_12s_linear_infinite]' : ''"
                 >
-                  <div class="flex h-20 w-20 items-center justify-center rounded-full border border-cyan-200/20 bg-cyan-200/10">
-                    <Disc3 class="h-9 w-9 text-cyan-100" />
+                  <div class="cover-center flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-cyan-200/20 bg-cyan-200/10">
+                    <img
+                      v-if="player.currentSong?.coverArt"
+                      :src="player.currentSong.coverArt"
+                      :alt="player.currentSong.title"
+                      class="h-full w-full object-cover"
+                    />
+                    <Disc3 v-else class="h-9 w-9 text-cyan-100" />
                   </div>
                 </div>
               </div>
@@ -380,7 +546,6 @@
                 <Shuffle class="h-4 w-4" />
               </button>
             </div>
-
             <div class="rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-4">
               <div class="flex items-center justify-between text-xs uppercase tracking-[0.28em] text-text-secondary">
                 <span>Volume</span>
@@ -440,6 +605,7 @@
             <span>默认音质：{{ qualityLabel }}</span>
             <span>自动播放：{{ autoPlay ? '开启' : '关闭' }}</span>
             <span>会话保持：{{ persistPlaylist ? '开启' : '关闭' }}</span>
+            <span>在线源：Jamendo CC</span>
           </div>
           <button class="secondary-button h-10 rounded-2xl px-4 text-sm font-medium text-white" @click="showPlaylist = true">
             打开队列（{{ player.playlist.length }}）
@@ -513,7 +679,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 backdrop-blur-md"
         @click.self="showSettings = false"
       >
-        <div class="panel-card w-full max-w-xl rounded-[2rem] border border-white/15">
+        <div class="panel-card w-full max-w-2xl rounded-[2rem] border border-white/15">
           <div class="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div>
               <div class="text-[11px] uppercase tracking-[0.3em] text-text-secondary">Settings</div>
@@ -530,11 +696,7 @@
                 <div class="text-sm font-medium text-white">默认音质</div>
                 <div class="mt-1 text-xs text-text-secondary">仅用于界面偏好展示，便于后续接真实音质策略。</div>
               </div>
-              <select
-                class="settings-select"
-                :value="defaultQuality"
-                @change="(e: Event) => defaultQuality = (e.target as HTMLSelectElement).value"
-              >
+              <select v-model="defaultQuality" class="settings-select">
                 <option value="standard">标准 128kbps</option>
                 <option value="high">高品质 320kbps</option>
                 <option value="lossless">无损 FLAC</option>
@@ -550,7 +712,6 @@
                 <span class="settings-switch-thumb" :class="autoPlay ? 'translate-x-5' : 'translate-x-0'" />
               </button>
             </div>
-
             <div class="settings-row">
               <div>
                 <div class="text-sm font-medium text-white">跨会话保留列表</div>
@@ -565,6 +726,30 @@
               </button>
             </div>
 
+            <div class="settings-row settings-row-stack">
+              <div>
+                <div class="text-sm font-medium text-white">Jamendo Client ID</div>
+                <div class="mt-1 text-xs text-text-secondary">
+                  这是官方开放平台的应用标识，不是私服资源。填好后即可搜索和播放合法 CC 音乐。
+                </div>
+              </div>
+              <input
+                v-model="jamendoClientId"
+                class="settings-input h-12 w-full rounded-2xl px-4 text-sm text-white outline-none transition"
+                placeholder="输入你的 Jamendo Client ID"
+              />
+            </div>
+
+            <div class="settings-row">
+              <div>
+                <div class="text-sm font-medium text-white">默认在线推荐标签</div>
+                <div class="mt-1 text-xs text-text-secondary">决定“在线发现”页默认拉取哪一类推荐音乐。</div>
+              </div>
+              <select v-model="onlineFeaturedTag" class="settings-select">
+                <option v-for="tag in featuredTags" :key="tag" :value="tag">{{ tag }}</option>
+              </select>
+            </div>
+
             <div class="rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-4">
               <div class="text-sm font-medium text-white">清理缓存</div>
               <p class="mt-1 text-xs leading-5 text-text-secondary">会清空当前列表、持久化缓存和最近播放记录。</p>
@@ -574,8 +759,8 @@
             </div>
 
             <div class="rounded-[1.6rem] border border-dashed border-white/10 bg-black/10 px-4 py-4 text-center">
-              <div class="text-sm font-medium text-white">CloudNote Music Player</div>
-              <div class="mt-1 text-xs text-text-secondary">Version 1.0.0 Beta</div>
+              <div class="text-sm font-medium text-white">CloudNote Music Player 1.1</div>
+              <div class="mt-1 text-xs text-text-secondary">Local + Online Discovery Edition</div>
             </div>
           </div>
         </div>
@@ -590,12 +775,16 @@ import {
   AlertCircle,
   ArrowRight,
   ArrowUpRight,
+  BadgeCheck,
+  CloudDownload,
   Disc3,
+  Globe2,
   Heart,
   History,
   Keyboard,
   Library,
   ListMusic,
+  LoaderCircle,
   MapPinned,
   Music4,
   Pause,
@@ -613,20 +802,28 @@ import {
   Volume2,
   X,
 } from 'lucide-vue-next'
-import { usePlayerStore } from '@/stores/player'
+import { getJamendoFeaturedTracks, searchJamendoTracks, type JamendoTrack } from '@/services/jamendo'
+import { usePlayerStore, type Song } from '@/stores/player'
 import { usePersistStore } from '@/stores/persist'
 
 const player = usePlayerStore()
 const persistStore = usePersistStore()
 
+const featuredTags = ['pop', 'jazz', 'electronic', 'rock', 'relaxation', 'classical', 'world']
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const showPlaylist = ref(false)
 const showSettings = ref(false)
-const activeTab = ref<'library' | 'queue' | 'favorites' | 'recents'>('queue')
+const activeTab = ref<'discover' | 'library' | 'queue' | 'favorites' | 'recents'>('queue')
 const searchQuery = ref('')
+const onlineQuery = ref('')
 const isDragActive = ref(false)
 const listViewportRef = ref<HTMLElement | null>(null)
 const favoriteIds = ref<Set<string>>(new Set())
+const onlineResults = ref<JamendoTrack[]>([])
+const onlineLoading = ref(false)
+const onlineError = ref('')
+const onlineHasLoaded = ref(false)
 
 let dragDepth = 0
 
@@ -644,6 +841,8 @@ const recents = ref<PersistedSongLike[]>([])
 const defaultQuality = ref('high')
 const autoPlay = ref(true)
 const persistPlaylist = ref(true)
+const jamendoClientId = ref('')
+const onlineFeaturedTag = ref('pop')
 
 const {
   loadPlaylist,
@@ -653,6 +852,9 @@ const {
   saveFavorites,
   loadRecents,
   saveRecents,
+  loadSettings,
+  saveSettings,
+  persistFiles,
   MAX_RECENTS_SIZE,
 } = persistStore
 
@@ -688,6 +890,13 @@ const libraryByArtist = computed(() => {
 })
 
 const tabItems = computed(() => [
+  {
+    key: 'discover' as const,
+    label: '在线发现',
+    description: '从合法音乐源搜索可播放内容',
+    icon: Globe2,
+    count: () => onlineResults.value.length,
+  },
   {
     key: 'queue' as const,
     label: '播放队列',
@@ -737,7 +946,7 @@ const topStats = computed(() => [
   {
     label: '总曲目',
     value: `${player.playlist.length}`,
-    hint: '当前导入的全部音频文件',
+    hint: '当前队列中的全部歌曲',
   },
   {
     label: '总时长',
@@ -750,13 +959,14 @@ const topStats = computed(() => [
     hint: '高频循环的歌曲',
   },
   {
-    label: '最近播放',
-    value: `${recents.value.length}`,
-    hint: '帮助你快速回到刚听过的内容',
+    label: '在线结果',
+    value: `${onlineResults.value.length}`,
+    hint: '当前在线发现页的结果数量',
   },
 ])
 
 const activeViewTitle = computed(() => {
+  if (activeTab.value === 'discover') return '在线发现'
   if (activeTab.value === 'library') return '按艺术家浏览资料库'
   if (activeTab.value === 'favorites') return '收藏歌曲'
   if (activeTab.value === 'recents') return '最近播放'
@@ -764,6 +974,7 @@ const activeViewTitle = computed(() => {
 })
 
 const activeViewEyebrow = computed(() => {
+  if (activeTab.value === 'discover') return 'Online Discovery'
   if (activeTab.value === 'library') return 'Library'
   if (activeTab.value === 'favorites') return 'Favorites'
   if (activeTab.value === 'recents') return 'Recent Plays'
@@ -771,6 +982,7 @@ const activeViewEyebrow = computed(() => {
 })
 
 const activeViewDescription = computed(() => {
+  if (activeTab.value === 'discover') return '接入合法在线音乐源，支持搜索、推荐和一键加入播放队列。'
   if (activeTab.value === 'library') return '聚合展示艺术家，让大列表也更容易快速跳转。'
   if (activeTab.value === 'favorites') return '这一页只保留你主动收藏过的内容。'
   if (activeTab.value === 'recents') return '找回刚刚听过的歌，不用再从头翻列表。'
@@ -789,13 +1001,34 @@ const qualityLabel = computed(() => {
   return '标准 128kbps'
 })
 
+const clientIdStatus = computed(() => (jamendoClientId.value ? 'Jamendo API 已连接' : '等待配置 Jamendo Client ID'))
+
 watch(
   () => player.currentSong?.id,
-  (songId) => {
-    if (!songId || !player.currentSong) return
+  () => {
+    if (!player.currentSong) return
     recordRecent(player.currentSong)
   },
 )
+
+watch(
+  [defaultQuality, autoPlay, persistPlaylist, jamendoClientId, onlineFeaturedTag],
+  () => {
+    saveSettings({
+      defaultQuality: defaultQuality.value,
+      autoPlay: autoPlay.value,
+      persistPlaylist: persistPlaylist.value,
+      jamendoClientId: jamendoClientId.value.trim(),
+      onlineFeaturedTag: onlineFeaturedTag.value,
+    })
+  },
+)
+
+watch(activeTab, async (tab) => {
+  if (tab === 'discover' && jamendoClientId.value && !onlineHasLoaded.value && !onlineLoading.value) {
+    await loadFeaturedTracks()
+  }
+})
 
 const onKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement | null
@@ -833,9 +1066,16 @@ const onKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   favoriteIds.value = new Set(loadFavorites())
   recents.value = loadRecents()
+
+  const settings = loadSettings()
+  defaultQuality.value = settings.defaultQuality
+  autoPlay.value = settings.autoPlay
+  persistPlaylist.value = settings.persistPlaylist
+  jamendoClientId.value = settings.jamendoClientId
+  onlineFeaturedTag.value = settings.onlineFeaturedTag
 
   if (persistPlaylist.value) {
     const savedSongs = loadPlaylist()
@@ -843,18 +1083,44 @@ onMounted(() => {
       player.addSongs(
         savedSongs.map((song) => ({
           ...song,
-          filePath: song.fileData || undefined,
+          filePath: song.filePath || song.fileData || undefined,
         })),
       )
     }
   }
 
   window.addEventListener('keydown', onKeyDown)
+
+  if (jamendoClientId.value) {
+    await loadFeaturedTracks()
+  }
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
 })
+
+const syncPersistedPlaylist = () => {
+  if (!persistPlaylist.value) return
+
+  const persistable = player.playlist
+    .filter((song) => song.fileData || song.source === 'jamendo')
+    .map((song) => ({
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      album: song.album,
+      duration: song.duration,
+      filePath: song.source === 'jamendo' ? song.filePath : undefined,
+      coverArt: song.coverArt,
+      source: song.source,
+      permalink: song.permalink,
+      license: song.license,
+      fileData: song.fileData || undefined,
+    }))
+
+  savePlaylist(persistable)
+}
 
 const toggleFavorite = (id: string) => {
   const next = new Set(favoriteIds.value)
@@ -865,14 +1131,14 @@ const toggleFavorite = (id: string) => {
   saveFavorites(Array.from(next))
 }
 
-const recordRecent = (song: { id: string; title: string; artist: string; album?: string; duration: number; fileData?: string }) => {
+const recordRecent = (song: Song) => {
   const persisted: PersistedSongLike = {
     id: song.id,
     title: song.title,
     artist: song.artist,
     album: song.album,
     duration: song.duration ?? 0,
-    fileData: song.fileData,
+    fileData: song.fileData || undefined,
   }
 
   const next = [persisted, ...recents.value.filter((item) => item.id !== persisted.id)].slice(0, MAX_RECENTS_SIZE)
@@ -935,6 +1201,99 @@ const filterByArtist = (artist: string) => {
   searchQuery.value = artist
 }
 
+const toPlayerSong = (track: JamendoTrack): Song => ({
+  id: track.id,
+  title: track.title,
+  artist: track.artist,
+  album: track.album,
+  duration: track.duration,
+  filePath: track.streamUrl,
+  coverArt: track.coverArt,
+  source: 'jamendo',
+  permalink: track.permalink,
+  license: track.license,
+})
+
+const addSongToQueue = (song: Song) => {
+  const exists = player.playlist.some((item) => item.id === song.id)
+  if (!exists) {
+    player.addSong(song)
+    syncPersistedPlaylist()
+  }
+}
+
+const addOnlineTrack = (track: JamendoTrack) => {
+  addSongToQueue(toPlayerSong(track))
+  activeTab.value = 'queue'
+}
+
+const playOnlineTrack = (track: JamendoTrack) => {
+  const song = toPlayerSong(track)
+  const existingIndex = player.playlist.findIndex((item) => item.id === song.id)
+  if (existingIndex >= 0) {
+    player.setCurrentSong(player.playlist[existingIndex], existingIndex)
+    activeTab.value = 'queue'
+    return
+  }
+
+  player.addSong(song)
+  const nextIndex = player.playlist.length - 1
+  player.setCurrentSong(song, nextIndex)
+  syncPersistedPlaylist()
+  activeTab.value = 'queue'
+}
+
+const loadFeaturedTracks = async () => {
+  if (!jamendoClientId.value.trim()) {
+    onlineError.value = '请先在设置中填写 Jamendo Client ID。'
+    return
+  }
+
+  onlineLoading.value = true
+  onlineError.value = ''
+
+  try {
+    onlineResults.value = await getJamendoFeaturedTracks(jamendoClientId.value, onlineFeaturedTag.value, 12)
+    onlineHasLoaded.value = true
+  } catch (error) {
+    onlineError.value = error instanceof Error ? error.message : '加载推荐失败'
+  } finally {
+    onlineLoading.value = false
+  }
+}
+
+const searchOnlineTracks = async () => {
+  if (!jamendoClientId.value.trim()) {
+    onlineError.value = '请先在设置中填写 Jamendo Client ID。'
+    showSettings.value = true
+    return
+  }
+
+  if (!onlineQuery.value.trim()) {
+    await loadFeaturedTracks()
+    return
+  }
+
+  onlineLoading.value = true
+  onlineError.value = ''
+
+  try {
+    onlineResults.value = await searchJamendoTracks(jamendoClientId.value, onlineQuery.value, 12)
+    onlineHasLoaded.value = true
+  } catch (error) {
+    onlineError.value = error instanceof Error ? error.message : '在线搜索失败'
+  } finally {
+    onlineLoading.value = false
+  }
+}
+
+const selectFeaturedTag = async (tag: string) => {
+  onlineFeaturedTag.value = tag
+  if (jamendoClientId.value.trim()) {
+    await loadFeaturedTracks()
+  }
+}
+
 const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const files = target.files
@@ -946,15 +1305,18 @@ const handleFileSelect = async (event: Event) => {
     artist: '本地文件',
     duration: 0,
     filePath: URL.createObjectURL(file),
+    source: 'local' as const,
     fileData: null as string | null,
   }))
 
   player.addSongs(songs)
 
   if (persistPlaylist.value) {
-    const persistedSongs = await persistStore.persistFiles(Array.from(files))
-    const existing = loadPlaylist()
-    savePlaylist([...existing, ...persistedSongs])
+    const persistedSongs = await persistFiles(Array.from(files))
+    songs.forEach((song, index) => {
+      song.fileData = persistedSongs[index]?.fileData || null
+    })
+    syncPersistedPlaylist()
   }
 
   if (autoPlay.value && !player.currentSong && songs.length > 0) {
@@ -977,6 +1339,7 @@ const playSongById = (id: string) => {
 
 const removeSong = (index: number) => {
   player.removeFromPlaylist(index)
+  syncPersistedPlaylist()
 }
 
 const handleSeek = (event: Event) => {
@@ -1051,14 +1414,16 @@ const clearCache = () => {
 }
 
 .input-shell,
-.settings-select {
+.settings-select,
+.settings-input {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(8, 16, 30, 0.52);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .input-shell:focus,
-.settings-select:focus {
+.settings-select:focus,
+.settings-input:focus {
   border-color: rgba(103, 232, 249, 0.55);
   box-shadow:
     0 0 0 4px rgba(34, 211, 238, 0.1),
@@ -1132,8 +1497,11 @@ const clearCache = () => {
 
 .stat-card,
 .artist-card,
+.online-card,
 .track-row-idle,
-.track-row-active {
+.track-row-active,
+.discover-hero,
+.empty-panel {
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -1141,7 +1509,8 @@ const clearCache = () => {
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.artist-card:hover {
+.artist-card:hover,
+.online-card:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(103, 232, 249, 0.12);
 }
@@ -1164,6 +1533,41 @@ const clearCache = () => {
   background: rgba(3, 10, 20, 0.3);
 }
 
+.tag-pill {
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  transition: all 0.2s ease;
+}
+
+.tag-pill-active {
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  background: rgba(34, 211, 238, 0.14);
+  color: white;
+}
+
+.tag-pill-idle {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.tag-pill-idle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.badge-soft {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.22rem 0.55rem;
+  font-size: 0.7rem;
+  color: rgba(226, 232, 240, 0.88);
+}
+
 .shortcut-key {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1182,6 +1586,11 @@ const clearCache = () => {
   border-radius: 1.5rem;
   background: rgba(255, 255, 255, 0.03);
   padding: 1rem 1rem 1rem 1.1rem;
+}
+
+.settings-row-stack {
+  align-items: flex-start;
+  flex-direction: column;
 }
 
 .settings-switch {

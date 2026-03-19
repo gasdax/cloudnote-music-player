@@ -1,65 +1,69 @@
-# CloudNote Music Player
+# CloudNote Music Player 1.1
 
-一个基于 **Vue 3 + Vite + TypeScript** 的本地音乐播放器项目，并在推进 **Tauri v2** 桌面端打包。
+CloudNote is a desktop-style music player built with Vue 3, Vite, TypeScript, and a Tauri-ready structure.
 
-## Screenshots / 截图
+This version adds a bigger product direction:
 
-主界面与设置页示例（截图文件位于 `docs/screenshots/`）。
+- Local music import and playback
+- Favorites, recents, queue management
+- Refreshed player UI
+- Legal online music discovery via Jamendo
 
-### 主界面 / Main
+## What Changed In 1.1
 
-![整体图片](docs/screenshots/整体图片.png)
+- Redesigned the player into a more polished dashboard layout
+- Added an `在线发现` view
+- Integrated Jamendo search and featured discovery
+- Allowed online tracks to be added to the queue or played directly
+- Persisted user settings such as quality preference and Jamendo Client ID
+- Kept the project GitHub-safe by using legal music sources instead of unauthorized song APIs
 
-### 设置 / Settings
+## Online Music Source
 
-![设置信息](docs/screenshots/设置信息.png)
+This project uses Jamendo as the first online provider.
 
-## 中文介绍
+Jamendo is suitable here because it offers Creative Commons music and an official API for discovery and streaming.
 
-### 亮点
+To enable online discovery:
 
-- **现代播放器界面**：侧边栏 + 列表区 + Now Playing 面板，深色玻璃拟态风格
-- **队列体验**：搜索、移除、清空、定位当前播放
-- **导入方式**：点击导入 / **拖拽文件导入**
-- **收藏与最近播放**：支持持久化保存
-- **快捷键**
-  - `Space`：播放/暂停
-  - `←/→`：快退/快进 5 秒
-  - `Ctrl+←/→`：上一首/下一首
+1. Create a Jamendo developer application
+2. Get your `Client ID`
+3. Open CloudNote settings
+4. Paste the `Client ID` into the Jamendo field
 
-### 运行
+After that, you can search online tracks and add them to the queue.
 
-要求：**Node.js 20.19+（推荐 Node 22 LTS）**
+## Run
 
-```bash
-npm install
-npm run dev
-```
+Requirements:
 
-打开 `http://localhost:5173/`。
+- Node.js 20.19+ recommended
 
-## English
-
-CloudNote Music Player is a local music player built with **Vue 3 + Vite + TypeScript**, with an ongoing migration towards a **Tauri v2** desktop app.
-
-### Features
-
-- **Modern player layout**: sidebar + list view + Now Playing panel (dark glassmorphism)
-- **Queue UX**: search, remove, clear, locate current track
-- **Import**: file picker + **drag & drop**
-- **Favorites & Recents**: persisted locally
-- **Keyboard shortcuts**
-  - `Space`: Play/Pause
-  - `←/→`: Seek -5s / +5s
-  - `Ctrl+←/→`: Previous / Next
-
-### Run
-
-Requires: **Node.js 20.19+ (Node 22 LTS recommended)**
+Install and start:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:5173/`.
+Open:
+
+```text
+http://127.0.0.1:4173/
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Screenshots
+
+Existing screenshots are in `docs/screenshots/`.
+
+## Notes
+
+- Local files are still the core playback flow
+- Online discovery currently focuses on legal content sources
+- Jamendo integration is client-side and meant for discovery / playback workflows inside the app
