@@ -3,70 +3,73 @@
 @tailwind utilities;
 
 :root {
-  /* 主色调 */
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  
-  /* 背景色 */
-  --background: #0f172a;
-  --surface: #1e293b;
-  --surface-hover: #334155;
-  
-  /* 文字颜色 */
-  --text-primary: #f8fafc;
+  --primary: #06b6d4;
+  --primary-hover: #0284c7;
+  --background: #081120;
+  --surface: #111c2f;
+  --surface-hover: #17243a;
+  --text-primary: #f8fbff;
   --text-secondary: #94a3b8;
-  
-  /* 功能色 */
   --success: #22c55e;
   --warning: #f59e0b;
-  --error: #ef4444;
-  
-  /* 玻璃态效果 */
-  --glass-bg: rgba(30, 41, 59, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --error: #f43f5e;
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--background);
-}
-
-#app {
-  width: 100%;
-  height: 100vh;
-  background-color: var(--background);
   color: var(--text-primary);
 }
 
-/* 玻璃态效果类 */
-.glass-effect {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+button,
+input,
+select {
+  font: inherit;
 }
 
-/* 更统一的滚动条（WebKit/Chromium） */
+button {
+  cursor: pointer;
+}
+
+#app {
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.28);
+  color: white;
+}
+
 *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
+
 *::-webkit-scrollbar-track {
   background: transparent;
 }
+
 *::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
-  border: 2px solid rgba(15, 23, 42, 0.8);
+  background: rgba(148, 163, 184, 0.22);
+  border: 2px solid rgba(8, 17, 32, 0.85);
   border-radius: 999px;
 }
+
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.36);
 }
 
-/* range 更顺眼一点（不覆盖 accent-primary） */
-input[type="range"] {
+input[type='range'] {
   outline: none;
 }
