@@ -4,14 +4,15 @@
 
 ## Screenshots / 截图
 
-将截图放到 `docs/screenshots/`，然后在此处引用（建议至少 2 张：主界面、资料库/队列）。
+主界面与设置页示例（截图文件位于 `docs/screenshots/`）。
 
-Example:
+### 主界面 / Main
 
-- `docs/screenshots/home.png`
-- `docs/screenshots/library.png`
+![整体图片](docs/screenshots/整体图片.png)
 
-（你把图片放好后，我也可以帮你把这里的图片链接补上。）
+### 设置 / Settings
+
+![设置信息](docs/screenshots/设置信息.png)
 
 ## 中文介绍
 
