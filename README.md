@@ -2,6 +2,17 @@
 
 一个基于 **Vue 3 + Vite + TypeScript** 的本地音乐播放器项目，并在推进 **Tauri v2** 桌面端打包。
 
+## Screenshots / 截图
+
+将截图放到 `docs/screenshots/`，然后在此处引用（建议至少 2 张：主界面、资料库/队列）。
+
+Example:
+
+- `docs/screenshots/home.png`
+- `docs/screenshots/library.png`
+
+（你把图片放好后，我也可以帮你把这里的图片链接补上。）
+
 ## 中文介绍
 
 ### 亮点
